@@ -1,7 +1,7 @@
 name: Build Android
 
 on:
-  pull_request:
+  push:
     branches: [main, develop]
 
 # Add explicit permissions for the workflow
@@ -49,11 +49,6 @@ jobs:
 
       - run: cd android && ./gradlew assembleRelease
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
-
       - name: Upload APK to Diawi and Wait for Link
         id: diawi
         run: |
@@ -93,27 +88,3 @@ jobs:
             echo "❌ Diawi did not return a link after waiting."
             exit 1
           fi
-
-      - name: Debug Environment
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Diawi link from ENV: ${{ env.DIAWI_LINK }}"
-          echo "Diawi link from output: ${{ steps.diawi.outputs.link }}"
-          echo "PR Number: ${{ github.event.number }}"
-          echo "Repository: ${{ github.repository }}"
-
-      - name: Save Diawi Link for PR Comment
-        if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
-        run: |
-          LINK="${{ env.DIAWI_LINK }}"
-          if [ -z "$LINK" ]; then
-            LINK="${{ steps.diawi.outputs.link }}"
-          fi
-          echo "$LINK" > diawi_link.txt
-
-      - name: Upload Diawi Link
-        if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
-        uses: actions/upload-artifact@v4
-        with:
-          name: diawi-link
-          path: diawi_link.txt
