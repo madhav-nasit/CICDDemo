@@ -3,6 +3,7 @@ name: Lint and Test
 
 on:
   workflow_call: {}
+  pull_request: {}
 
 jobs:
   lint-and-test:
