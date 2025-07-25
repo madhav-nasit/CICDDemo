@@ -5,11 +5,17 @@ on:
     branches: [main, develop]
 
 jobs:
-  lint-and-test:
-    uses: ./.github/workflows/lint-and-test.yml
+  lint:
+    name: Lint & Formatting Check
+    uses: ./.github/workflows/lint.yml
+
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/test.yml
+    needs: lint
 
   build-android:
-    needs: lint-and-test
+    needs: test
     runs-on: ubuntu-latest
 
     steps:

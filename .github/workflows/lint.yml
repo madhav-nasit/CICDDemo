@@ -1,4 +1,4 @@
-name: Lint and Test
+name: Lint Check
 
 on:
   workflow_call: {}
@@ -27,21 +27,3 @@ jobs:
 
       - name: TypeScript Check (no emit)
         run: npx tsc --noEmit
-
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    needs: lint
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Run Unit Tests
-        run: npm test -- --coverage --watchAll=false
