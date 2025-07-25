@@ -4,8 +4,6 @@ name: React Native CI/CD
 on:
   push:
     branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
 
 jobs:
   # Job 1: Lint and Test
