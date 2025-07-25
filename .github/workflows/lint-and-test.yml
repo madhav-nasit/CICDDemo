@@ -1,0 +1,26 @@
+# .github/workflows/lint-and-test.yml
+name: Lint and Test
+
+on:
+  workflow_call: {}
+  pull_request: {}
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npx tsc --noEmit
+
+      - run: npm test -- --coverage --watchAll=false
