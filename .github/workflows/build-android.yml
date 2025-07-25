@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Add explicit permissions for the workflow
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   lint:
     name: Lint & Formatting Check
@@ -96,35 +102,18 @@ jobs:
           echo "PR Number: ${{ github.event.number }}"
           echo "Repository: ${{ github.repository }}"
 
-      - name: Comment Diawi Link on PR
+      - name: Save Diawi Link for PR Comment
         if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
-        uses: actions/github-script@v7
+        run: |
+          LINK="${{ env.DIAWI_LINK }}"
+          if [ -z "$LINK" ]; then
+            LINK="${{ steps.diawi.outputs.link }}"
+          fi
+          echo "$LINK" > diawi_link.txt
+
+      - name: Upload Diawi Link
+        if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
+        uses: actions/upload-artifact@v4
         with:
-          script: |
-            const link = process.env.DIAWI_LINK || '${{ steps.diawi.outputs.link }}';
-
-            if (!link || link === 'null' || link === '') {
-              console.log('❌ No valid Diawi link found');
-              return;
-            }
-
-            const body = `🚀 **Android APK Ready!**
-
-            📱 [**Install APK from Diawi**](${link})
-
-            *Built from commit: \`${{ github.sha }}\`*`;
-
-            try {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: body
-              });
-              console.log('✅ Successfully commented on PR');
-            } catch (error) {
-              console.error('❌ Failed to comment on PR:', error);
-              throw error;
-            }
-        env:
-          DIAWI_LINK: ${{ env.DIAWI_LINK }}
+          name: diawi-link
+          path: diawi_link.txt
