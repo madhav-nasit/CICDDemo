@@ -47,11 +47,33 @@ jobs:
           name: android-apk
           path: android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload APK to Diawi
+      - name: Upload APK to Diawi and Get Link
+        id: diawi
         run: |
-          curl -F "token=${{ secrets.DIAWI_TOKEN }}" \
-               -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
-               -F "comment=Uploaded via GitHub Actions CI" \
-               -F "find_by_udid=0" \
-               -F "wall_of_apps=0" \
-               https://upload.diawi.com/
+          echo "Uploading APK to Diawi..."
+          response=$(curl -s -F "token=${{ secrets.DIAWI_TOKEN }}" \
+                           -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
+                           -F "comment=Uploaded via GitHub Actions CI" \
+                           -F "find_by_udid=0" \
+                           -F "wall_of_apps=0" \
+                           https://upload.diawi.com/)
+
+          echo "Raw Response: $response"
+          link=$(echo "$response" | jq -r '.link // empty')
+
+          if [ -n "$link" ]; then
+            echo "✅ Diawi link: $link"
+            echo "link=$link" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Failed to retrieve Diawi link."
+            echo "link=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment Diawi Link on PR
+        if: github.event_name == 'pull_request' && steps.diawi.outputs.link != ''
+        run: |
+          gh pr comment "$PR_URL" --body "🚀 Android APK uploaded to Diawi: [Install here](${DIWAI_LINK})"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          DIWAI_LINK: ${{ steps.diawi.outputs.link }}
