@@ -21,6 +21,9 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
 
+    outputs:
+      diawi_link: ${{ steps.diawi.outputs.link }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -78,7 +81,6 @@ jobs:
 
             if [ -n "$link" ]; then
               echo "✅ Diawi link: $link"
-              echo "link=$link" >> $GITHUB_ENV
               echo "link=$link" >> $GITHUB_OUTPUT
               exit 0
             fi
@@ -87,12 +89,18 @@ jobs:
           echo "❌ Diawi did not return a link after waiting."
           exit 1
 
-      - name: Comment Diawi Link on PR
-        if: github.event_name == 'pull_request' && steps.diawi.outputs.link != ''
+  comment-diawi-link:
+    name: Comment Diawi Link on PR
+    needs: build-android
+    if: github.event_name == 'pull_request' && needs.build-android.outputs.diawi_link != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post comment to PR
         run: |
-          echo "📦 Diawi Link: $DIWAI_LINK"
-          gh pr comment "$PR_URL" --body "🚀 Android APK uploaded to Diawi: [Install here](${DIWAI_LINK})"
+          echo "Posting Diawi link: $DIAWI_LINK"
+          gh pr comment "$PR_URL" --body "🚀 Android APK uploaded to Diawi: [Install here]($DIAWI_LINK)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
-          DIWAI_LINK: ${{ steps.diawi.outputs.link }}
+          DIAWI_LINK: ${{ needs.build-android.outputs.diawi_link }}
