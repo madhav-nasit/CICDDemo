@@ -64,11 +64,11 @@ jobs:
 
       # Run Tests Build
       - name: Run gradle tests
-        run: ./gradlew test
+        run: cd android && ./gradlew test
 
       # Run Build Project
       - name: Build gradle project
-        run: ./gradlew build
+        run: cd android && ./gradlew build
 
       - name: Build Android APK
         run: cd android && ./gradlew assembleRelease
