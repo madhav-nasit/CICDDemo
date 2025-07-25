@@ -1,8 +1,6 @@
 name: Build Android
 
 on:
-  push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
@@ -68,6 +66,7 @@ jobs:
           fi
 
           echo "Polling Diawi for public link..."
+          link=""
           for i in {1..10}; do
             sleep 6
             poll=$(curl -s "https://upload.diawi.com/status?token=${{ secrets.DIAWI_TOKEN }}&job=$job")
@@ -76,7 +75,7 @@ jobs:
 
             echo "[$i] Status: $message"
 
-            if [ -n "$link" ]; then
+            if [ -n "$link" ] && [ "$link" != "null" ]; then
               echo "✅ Diawi link: $link"
               echo "DIAWI_LINK=$link" >> $GITHUB_ENV
               echo "link=$link" >> $GITHUB_OUTPUT
@@ -84,7 +83,7 @@ jobs:
             fi
           done
 
-          if [ -z "$link" ]; then
+          if [ -z "$link" ] || [ "$link" == "null" ]; then
             echo "❌ Diawi did not return a link after waiting."
             exit 1
           fi
@@ -94,19 +93,38 @@ jobs:
           echo "Event name: ${{ github.event_name }}"
           echo "Diawi link from ENV: ${{ env.DIAWI_LINK }}"
           echo "Diawi link from output: ${{ steps.diawi.outputs.link }}"
-          echo "PR URL: ${{ github.event.pull_request.html_url }}"
+          echo "PR Number: ${{ github.event.number }}"
+          echo "Repository: ${{ github.repository }}"
 
       - name: Comment Diawi Link on PR
         if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
-        run: |
-          LINK="${{ env.DIAWI_LINK }}"
-          if [ -z "$LINK" ]; then
-            LINK="${{ steps.diawi.outputs.link }}"
-          fi
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const link = process.env.DIAWI_LINK || '${{ steps.diawi.outputs.link }}';
 
-          echo "📦 Using Diawi Link: $LINK"
+            if (!link || link === 'null' || link === '') {
+              console.log('❌ No valid Diawi link found');
+              return;
+            }
 
-          gh pr comment "${{ github.event.pull_request.html_url }}" \
-            --body "🚀 Android APK uploaded to Diawi: [Install here]($LINK)"
+            const body = `🚀 **Android APK Ready!**
+
+            📱 [**Install APK from Diawi**](${link})
+
+            *Built from commit: \`${{ github.sha }}\`*`;
+
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+              console.log('✅ Successfully commented on PR');
+            } catch (error) {
+              console.error('❌ Failed to comment on PR:', error);
+              throw error;
+            }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DIAWI_LINK: ${{ env.DIAWI_LINK }}
