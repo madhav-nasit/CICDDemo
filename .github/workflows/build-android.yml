@@ -47,27 +47,62 @@ jobs:
           name: android-apk
           path: android/app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload APK to Diawi and Get Link
+      # - name: Upload APK to Diawi and Get Link
+      #   id: diawi
+      #   run: |
+      #     echo "Uploading APK to Diawi..."
+      #     response=$(curl -s -F "token=${{ secrets.DIAWI_TOKEN }}" \
+      #                      -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
+      #                      -F "comment=Uploaded via GitHub Actions CI" \
+      #                      -F "find_by_udid=0" \
+      #                      -F "wall_of_apps=0" \
+      #                      https://upload.diawi.com/)
+
+      #     echo "Raw Response: $response"
+      #     link=$(echo "$response" | jq -r '.link // empty')
+
+      #     if [ -n "$link" ]; then
+      #       echo "✅ Diawi link: $link"
+      #       echo "link=$link" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "❌ Failed to retrieve Diawi link."
+      #       echo "link=" >> $GITHUB_OUTPUT
+      #     fi
+      - name: Upload APK to Diawi and Wait for Link
         id: diawi
         run: |
           echo "Uploading APK to Diawi..."
           response=$(curl -s -F "token=${{ secrets.DIAWI_TOKEN }}" \
                            -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
                            -F "comment=Uploaded via GitHub Actions CI" \
-                           -F "find_by_udid=0" \
-                           -F "wall_of_apps=0" \
                            https://upload.diawi.com/)
 
           echo "Raw Response: $response"
-          link=$(echo "$response" | jq -r '.link // empty')
+          job=$(echo "$response" | jq -r '.job')
 
-          if [ -n "$link" ]; then
-            echo "✅ Diawi link: $link"
-            echo "link=$link" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Failed to retrieve Diawi link."
-            echo "link=" >> $GITHUB_OUTPUT
+          if [ -z "$job" ] || [ "$job" == "null" ]; then
+            echo "❌ Failed to retrieve Diawi job ID."
+            exit 1
           fi
+
+          echo "Polling Diawi for public link..."
+          for i in {1..10}; do
+            sleep 6
+            poll=$(curl -s "https://upload.diawi.com/status?token=${{ secrets.DIAWI_TOKEN }}&job=$job")
+            link=$(echo "$poll" | jq -r '.link // empty')
+            message=$(echo "$poll" | jq -r '.message')
+
+            echo "[$i] Status: $message"
+
+            if [ -n "$link" ]; then
+              echo "✅ Diawi link: $link"
+              echo "link=$link" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          echo "❌ Diawi did not return a link after waiting."
+          exit 1
 
       - name: Comment Diawi Link on PR
         if: github.event_name == 'pull_request' && steps.diawi.outputs.link != ''
