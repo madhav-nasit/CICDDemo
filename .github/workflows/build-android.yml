@@ -46,3 +46,12 @@ jobs:
         with:
           name: android-apk
           path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload APK to Diawi
+        run: |
+          curl -F "token=${{ secrets.DIAWI_TOKEN }}" \
+               -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
+               -F "comment=Uploaded via GitHub Actions CI" \
+               -F "find_by_udid=0" \
+               -F "wall_of_apps=0" \
+               https://upload.diawi.com/
