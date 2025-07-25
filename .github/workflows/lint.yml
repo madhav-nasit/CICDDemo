@@ -1,0 +1,29 @@
+name: Lint Check
+
+on:
+  workflow_call: {}
+  pull_request: {}
+
+jobs:
+  lint:
+    name: Lint & Formatting Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run Prettier Check
+        run: npx prettier --check .
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: TypeScript Check (no emit)
+        run: npx tsc --noEmit
