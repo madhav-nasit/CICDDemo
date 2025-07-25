@@ -21,9 +21,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
 
-    outputs:
-      diawi_link: ${{ steps.diawi.outputs.link }}
-
     steps:
       - uses: actions/checkout@v4
 
@@ -81,26 +78,35 @@ jobs:
 
             if [ -n "$link" ]; then
               echo "✅ Diawi link: $link"
+              echo "DIAWI_LINK=$link" >> $GITHUB_ENV
               echo "link=$link" >> $GITHUB_OUTPUT
-              exit 0
+              break
             fi
           done
 
-          echo "❌ Diawi did not return a link after waiting."
-          exit 1
+          if [ -z "$link" ]; then
+            echo "❌ Diawi did not return a link after waiting."
+            exit 1
+          fi
 
-  comment-diawi-link:
-    name: Comment Diawi Link on PR
-    needs: build-android
-    if: github.event_name == 'pull_request' && needs.build-android.outputs.diawi_link != ''
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Post comment to PR
+      - name: Debug Environment
         run: |
-          echo "Posting Diawi link: $DIAWI_LINK"
-          gh pr comment "$PR_URL" --body "🚀 Android APK uploaded to Diawi: [Install here]($DIAWI_LINK)"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Diawi link from ENV: ${{ env.DIAWI_LINK }}"
+          echo "Diawi link from output: ${{ steps.diawi.outputs.link }}"
+          echo "PR URL: ${{ github.event.pull_request.html_url }}"
+
+      - name: Comment Diawi Link on PR
+        if: github.event_name == 'pull_request' && (env.DIAWI_LINK != '' || steps.diawi.outputs.link != '')
+        run: |
+          LINK="${{ env.DIAWI_LINK }}"
+          if [ -z "$LINK" ]; then
+            LINK="${{ steps.diawi.outputs.link }}"
+          fi
+
+          echo "📦 Using Diawi Link: $LINK"
+
+          gh pr comment "${{ github.event.pull_request.html_url }}" \
+            --body "🚀 Android APK uploaded to Diawi: [Install here]($LINK)"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          DIAWI_LINK: ${{ needs.build-android.outputs.diawi_link }}
