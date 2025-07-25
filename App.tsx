@@ -19,7 +19,7 @@ function App() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text style={styles.text}>Welcome to the CI/CD Demo App!</Text>
+      <Text style={styles.text}>Welcome to the CI/CD Demo App~</Text>
     </View>
   );
 }
