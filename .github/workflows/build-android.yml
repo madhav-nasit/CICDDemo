@@ -15,6 +15,7 @@ jobs:
     needs: lint
 
   build-android:
+    name: Build Android APK
     needs: test
     runs-on: ubuntu-latest
 
@@ -42,7 +43,42 @@ jobs:
 
       - run: cd android && ./gradlew assembleRelease
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+      - name: Upload APK to Diawi and Wait for Link
+        id: diawi
+        run: |
+          echo "Uploading APK to Diawi..."
+          response=$(curl -s -F "token=${{ secrets.DIAWI_TOKEN }}" \
+                           -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
+                           -F "comment=Uploaded via GitHub Actions CI" \
+                           https://upload.diawi.com/)
+
+          echo "Raw Response: $response"
+          job=$(echo "$response" | jq -r '.job')
+
+          if [ -z "$job" ] || [ "$job" == "null" ]; then
+            echo "❌ Failed to retrieve Diawi job ID."
+            exit 1
+          fi
+
+          echo "Polling Diawi for public link..."
+          link=""
+          for i in {1..10}; do
+            sleep 6
+            poll=$(curl -s "https://upload.diawi.com/status?token=${{ secrets.DIAWI_TOKEN }}&job=$job")
+            link=$(echo "$poll" | jq -r '.link // empty')
+            message=$(echo "$poll" | jq -r '.message')
+
+            echo "[$i] Status: $message"
+
+            if [ -n "$link" ] && [ "$link" != "null" ]; then
+              echo "✅ Diawi link: $link"
+              echo "DIAWI_LINK=$link" >> $GITHUB_ENV
+              echo "link=$link" >> $GITHUB_OUTPUT
+              break
+            fi
+          done
+
+          if [ -z "$link" ] || [ "$link" == "null" ]; then
+            echo "❌ Diawi did not return a link after waiting."
+            exit 1
+          fi
