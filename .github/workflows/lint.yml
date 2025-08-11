@@ -1,6 +1,6 @@
 name: Lint Check
 
-on: 
+on:
   workflow_call: {}
 
 jobs:
