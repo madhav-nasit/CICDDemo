@@ -41,9 +41,28 @@ jobs:
 
       - run: cd android && ./gradlew build
 
-      - run: cd android && ./gradlew assembleRelease
+      # Build AAB on main, APK on develop
+      - name: Build Android Artifact
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            cd android && ./gradlew bundleRelease
+          else
+            cd android && ./gradlew assembleRelease
+          fi
 
+      # Set artifact path for upload
+      - name: Set Artifact Path
+        id: artifact
+        run: |
+          if [[ "${GITHUB_REF##*/}" == "main" ]]; then
+            echo "ARTIFACT_PATH=android/app/build/outputs/bundle/release/app-release.aab" >> $GITHUB_ENV
+          else
+            echo "ARTIFACT_PATH=android/app/build/outputs/apk/release/app-release.apk" >> $GITHUB_ENV
+          fi
+
+      # Upload to Diawi (only works for APK, skip for AAB)
       - name: Upload APK to Diawi and Wait for Link
+        if: github.ref == 'refs/heads/develop'
         id: diawi
         run: |
           echo "Uploading APK to Diawi..."
@@ -51,15 +70,12 @@ jobs:
                            -F "file=@android/app/build/outputs/apk/release/app-release.apk" \
                            -F "comment=Uploaded via GitHub Actions CI" \
                            https://upload.diawi.com/)
-
           echo "Raw Response: $response"
           job=$(echo "$response" | jq -r '.job')
-
           if [ -z "$job" ] || [ "$job" == "null" ]; then
             echo "❌ Failed to retrieve Diawi job ID."
             exit 1
           fi
-
           echo "Polling Diawi for public link..."
           link=""
           for i in {1..10}; do
@@ -67,9 +83,7 @@ jobs:
             poll=$(curl -s "https://upload.diawi.com/status?token=${{ secrets.DIAWI_TOKEN }}&job=$job")
             link=$(echo "$poll" | jq -r '.link // empty')
             message=$(echo "$poll" | jq -r '.message')
-
             echo "[$i] Status: $message"
-
             if [ -n "$link" ] && [ "$link" != "null" ]; then
               echo "✅ Diawi link: $link"
               echo "DIAWI_LINK=$link" >> $GITHUB_ENV
@@ -77,7 +91,6 @@ jobs:
               break
             fi
           done
-
           if [ -z "$link" ] || [ "$link" == "null" ]; then
             echo "❌ Diawi did not return a link after waiting."
             exit 1
