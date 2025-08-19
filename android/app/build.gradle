@@ -116,4 +116,7 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // In-app review API for UtilityBridge
+    implementation("com.google.android.play:review:2.0.1")
 }

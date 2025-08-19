@@ -18,6 +18,7 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
+              add(com.cicddemo.utility.UtilityPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"
@@ -36,3 +37,4 @@ class MainApplication : Application(), ReactApplication {
     loadReactNative(this)
   }
 }
+
