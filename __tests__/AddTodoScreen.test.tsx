@@ -18,7 +18,7 @@ describe('AddTodoScreen', () => {
       .spyOn(Alert, 'alert')
       .mockImplementation(() => undefined);
 
-    let tree: ReactTestRenderer.ReactTestRenderer;
+    let tree!: ReactTestRenderer.ReactTestRenderer;
     act(() => {
       tree = ReactTestRenderer.create(
         <Provider store={store}>
@@ -43,7 +43,7 @@ describe('AddTodoScreen', () => {
   it('dispatches addTodo when title is provided', () => {
     const store = configureStore({ reducer: { todos: todosReducer } });
 
-    let tree: ReactTestRenderer.ReactTestRenderer;
+    let tree!: ReactTestRenderer.ReactTestRenderer;
     act(() => {
       tree = ReactTestRenderer.create(
         <Provider store={store}>
