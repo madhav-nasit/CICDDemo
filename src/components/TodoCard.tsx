@@ -10,6 +10,7 @@ interface TodoCardProps {
   completed: boolean;
   onDelete: () => void;
   onToggle: () => void;
+  dummyProp?: any;
 }
 
 const TodoCard: React.FC<TodoCardProps> = ({
@@ -19,6 +20,7 @@ const TodoCard: React.FC<TodoCardProps> = ({
   completed,
   onDelete,
   onToggle,
+  dummyProp,
 }) => (
   <View key={id} style={[styles.card, completed && styles.completedCard]}>
     <TouchableOpacity style={styles.toggleButton} onPress={onToggle}>

@@ -24,7 +24,7 @@ const HomeScreen: React.FC = () => {
   const todos = useAppSelector(state => state.todos.todos);
   const dispatch = useAppDispatch();
 
-  const handleDeleteTodo = (id: string) => {
+  const handleDeleteTodo = id => {
     dispatch(removeTodo(id));
   };
 
