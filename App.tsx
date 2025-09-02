@@ -5,32 +5,15 @@
  * @format
  */
 
-import {
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { store } from './src/store';
+import RootNavigator from './src/navigation/RootNavigator';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
+export default function App() {
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text style={styles.text}>Welcome to the Todo App!</Text>
-    </View>
+    <Provider store={store}>
+      <RootNavigator />
+    </Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: { color: 'black' },
-});
-
-export default App;
