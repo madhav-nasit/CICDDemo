@@ -19,7 +19,7 @@ function App() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <Text style={styles.text}>Welcome to the CI/CD Demo App!</Text>
+      <Text style={styles.text}>Welcome to the Todo App!</Text>
     </View>
   );
 }
@@ -27,6 +27,8 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   text: { color: 'black' },
 });
