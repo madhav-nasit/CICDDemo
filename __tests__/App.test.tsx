@@ -3,11 +3,19 @@
  */
 
 import React from 'react';
-import ReactTestRenderer from 'react-test-renderer';
+import ReactTestRenderer, { act } from 'react-test-renderer';
 import App from '../App';
 
-test('renders correctly', async () => {
-  await ReactTestRenderer.act(() => {
-    ReactTestRenderer.create(<App />);
+test('renders App and unmounts without errors', () => {
+  jest.useFakeTimers();
+  let tree: ReactTestRenderer.ReactTestRenderer;
+  act(() => {
+    tree = ReactTestRenderer.create(<App />);
+  });
+  act(() => {
+    jest.runOnlyPendingTimers();
+  });
+  act(() => {
+    tree.unmount();
   });
 });
