@@ -20,10 +20,11 @@ const TodoCard: React.FC<TodoCardProps> = ({
   completed,
   onDelete,
   onToggle,
+  dummyProp,
 }) => (
   <View key={id} style={[styles.card, completed && styles.completedCard]}>
     <TouchableOpacity style={styles.toggleButton} onPress={onToggle}>
-        <View style={[styles.checkbox, completed && styles.checkedBox]}>
+      <View style={[styles.checkbox, completed && styles.checkedBox]}>
         {completed && <Text style={styles.checkmark}>✓</Text>}
       </View>
     </TouchableOpacity>
