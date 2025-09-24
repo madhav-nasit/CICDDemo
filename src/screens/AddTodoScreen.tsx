@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -29,9 +29,9 @@ const AddTodoScreen: React.FC = () => {
   const [description, setDescription] = useState('');
 
   // ISSUE: Eslint
-  useEffect(() => {
-    setDescription(title);
-  }, []);
+  // useEffect(() => {
+  //   setDescription(title);
+  // }, []);
 
   const handleSave = () => {
     if (title.trim() === '') {
