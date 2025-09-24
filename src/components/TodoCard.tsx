@@ -20,6 +20,7 @@ const TodoCard: React.FC<TodoCardProps> = ({
   completed,
   onDelete,
   onToggle,
+  // ISSUE: Eslint & Typescript
   dummyProp,
 }) => (
   <View key={id} style={[styles.card, completed && styles.completedCard]}>

@@ -24,6 +24,7 @@ const HomeScreen: React.FC = () => {
   const todos = useAppSelector(state => state.todos.todos);
   const dispatch = useAppDispatch();
 
+  // ISSUE: Eslint & Typescript
   const handleDeleteTodo = id => {
     dispatch(removeTodo(id));
   };

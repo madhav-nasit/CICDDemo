@@ -28,10 +28,10 @@ const AddTodoScreen: React.FC = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
-  // Eslint error
-  useEffect(() => {
-    setDescription(title);
-  }, []);
+  // ISSUE: Eslint
+  // useEffect(() => {
+  //   setDescription(title);
+  // }, []);
 
   const handleSave = () => {
     if (title.trim() === '') {
