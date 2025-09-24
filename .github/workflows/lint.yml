@@ -37,27 +37,9 @@ jobs:
 
       - name: Run Prettier Check
         run: npx prettier --check .
-        continue-on-error: true
 
       - name: Run Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: TypeScript Check (no emit)
         run: npx tsc --noEmit
-        continue-on-error: true
-
-      - name: Fail if any step failed
-        run: |
-          echo "Prettier outcome: ${{ steps.prettier.outcome }}"
-          echo "Lint outcome:     ${{ steps.lint.outcome }}"
-          echo "TS Check outcome: ${{ steps.tsc.outcome }}"
-
-          if [ "${{ steps.prettier.outcome }}" == "failure" ] || \
-             [ "${{ steps.lint.outcome }}" == "failure" ] || \
-             [ "${{ steps.tsc.outcome }}" == "failure" ]; then
-            echo "❌ One or more checks failed"
-            exit 1
-          else
-            echo "✅ All checks passed"
-          fi
