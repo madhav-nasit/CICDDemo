@@ -53,7 +53,7 @@ const HomeScreen: React.FC = () => {
           style={styles.addButton}
           onPress={() => navigation.navigate('AddTodo')}
         >
-          <Text style={styles.addButtonText}>+ Add Todo</Text>
+          <Text style={styles.addButtonText}>+ Add Todo 1</Text>
         </TouchableOpacity>
       </View>
 
