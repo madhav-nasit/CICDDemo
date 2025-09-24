@@ -1,7 +1,7 @@
 # This GitHub Actions workflow performs linting and formatting checks on the codebase.
-# 
+#
 # Name: Lint Check
-# 
+#
 # Triggers:
 #   - Can be invoked by other workflows using `workflow_call`.
 #

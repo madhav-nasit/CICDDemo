@@ -21,7 +21,7 @@ const TodoCard: React.FC<TodoCardProps> = ({
   onDelete,
   onToggle,
   // ISSUE: Eslint & Typescript
-  dummyProp,
+  // dummyProp,
 }) => (
   <View key={id} style={[styles.card, completed && styles.completedCard]}>
     <TouchableOpacity style={styles.toggleButton} onPress={onToggle}>
