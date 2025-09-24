@@ -1,3 +1,20 @@
+# This GitHub Actions workflow performs linting and formatting checks on the codebase.
+#
+# Name: Lint Check
+#
+# Triggers:
+#   - Can be invoked by other workflows using `workflow_call`.
+#
+# Jobs:
+#   lint:
+#     - Runs on: ubuntu-latest
+#     - Steps:
+#         1. Checks out the repository code.
+#         2. Sets up Node.js version 18 with npm caching.
+#         3. Installs dependencies using `npm ci`.
+#         4. Runs Prettier to check code formatting.
+#         5. Runs the project's lint script.
+#         6. Runs TypeScript compiler in noEmit mode to check for type errors.
 name: Lint Check
 
 on:

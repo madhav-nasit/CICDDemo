@@ -1,3 +1,10 @@
+# This workflow is triggered by a workflow_call event, allowing it to be reused by other workflows.
+# It sets up a job named "Run Tests" on the latest Ubuntu runner.
+# The workflow performs the following steps:
+# 1. Checks out the repository code using actions/checkout@v4.
+# 2. Sets up Node.js version 18 with npm caching using actions/setup-node@v4.
+# 3. Installs dependencies using 'npm ci' for a clean and reproducible install.
+# 4. Runs unit tests with coverage reporting and disables watch mode.
 name: Test
 
 on:
