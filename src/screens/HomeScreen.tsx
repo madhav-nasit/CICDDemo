@@ -25,8 +25,8 @@ const HomeScreen: React.FC = () => {
   const dispatch = useAppDispatch();
 
   // ISSUE: Eslint & Typescript
-  // const handleDeleteTodo = id => {
-  const handleDeleteTodo = (id: string) => {
+  const handleDeleteTodo = id => {
+    // const handleDeleteTodo = (id: string) => {
     dispatch(removeTodo(id));
   };
 
