@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,11 @@ const AddTodoScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+
+  // Eslint error
+  useEffect(() => {
+    setDescription(title);
+  }, []);
 
   const handleSave = () => {
     if (title.trim() === '') {
