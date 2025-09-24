@@ -48,5 +48,16 @@ jobs:
         continue-on-error: true
 
       - name: Fail if any step failed
-        if: ${{ failure() }}
-        run: exit 1
+        run: |
+          echo "Prettier outcome: ${{ steps.prettier.outcome }}"
+          echo "Lint outcome:     ${{ steps.lint.outcome }}"
+          echo "TS Check outcome: ${{ steps.tsc.outcome }}"
+
+          if [ "${{ steps.prettier.outcome }}" == "failure" ] || \
+             [ "${{ steps.lint.outcome }}" == "failure" ] || \
+             [ "${{ steps.tsc.outcome }}" == "failure" ]; then
+            echo "❌ One or more checks failed"
+            exit 1
+          else
+            echo "✅ All checks passed"
+          fi
